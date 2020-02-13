@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="../static/layui/css/layui.css">
+	<script src="../static/layui/layui.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>库存管理</title>
+</head>
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header">
+			<div class="layui-logo "><i class="layui-icon layui-icon-cart"></i>库存管理系统</div>
+			<!-- 头部区域（可配合layui已有的水平导航） -->
+			<ul class="layui-nav layui-layout-left">
+				<li class="layui-nav-item" ><a href="/index/"><i class="layui-icon layui-icon-table"></i>库存管理</a></li>
+				<li class="layui-nav-item"><a href="/other/"><i class="layui-icon layui-icon-time"></i>出入库记录</a></li>
+			</ul>
+			<ul class="layui-nav layui-layout-right">
+				<li class="layui-nav-item"><button type="button" class="layui-btn layui-bg-black" id="save"><i class="layui-icon layui-icon-star"></i>数据备份</button></li>
+			    <li class="layui-nav-item"><button type="button" class="layui-btn layui-bg-black" id="excel"><i class="layui-icon layui-icon-print"></i>导出Excel</button></li>
+            </ul>
+		</div>
+
+		<div style="padding: 2%;">
+			<!-- 内容主体区域 -->
+            <div class="layui-fluid">
+                <div class="demoTable">
+                    <i class="layui-icon layui-icon-search"></i>
+                    搜索品名：
+                    <div class="layui-inline">
+                        <input class="layui-input" name="name" id="demoReload" autocomplete="off">
+                    </div>
+                    <button class="layui-btn" id="searchbt" data-type="reload">搜索</button>
+                    <button type="button" class="layui-btn" id="addbt" style="float: right;"><i class="layui-icon">&#xe608;</i> 添加库存品类</button>
+                </div>
+            </div>
+			<table class="layui-hide" id="good" lay-filter="good"></table>
+
+			<script type="text/html" id="toolbarDemo">
+				<div class="layui-btn-container">
+					<button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
+					<button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
+					<button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
+				</div>
+			</script>
+			
+			<script type="text/html" id="barDemo">
+				<a class="layui-btn layui-btn-xs" lay-event="out">出库</a>
+                <a class="layui-btn layui-btn-xs" lay-event="in">入库</a>
+				<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+			</script>
+        </div>
+        <script type="text/html" id="inlog">
+            <form class="layui-form" action="/op/in">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                    <legend>入库登记</legend>
+                </fieldset>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">ID</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="id" id="iid" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">品名</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="name" id="iname" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">型号</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="size" id="isize" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">入库数量</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="change" lay-verify="required|number" placeholder="请输入库数量" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+                    </div>
+                </div>
+            </form>
+        </script>
+        <script type="text/html" id="outlog">
+            <form class="layui-form" action="/op/out">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                    <legend>出库登记</legend>
+                </fieldset>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">ID</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="id" id="oid" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">品名</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="name" id="oname" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">型号</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="size" id="osize" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">出库数量</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="change" lay-verify="required|number" placeholder="请输出库数量" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+                    </div>
+                </div>
+            </form>
+        </script>
+        <script type="text/html" id="delgoods">
+            <form class="layui-form" action="/op/del">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                    <legend>删除库存品类</legend>
+                </fieldset>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">ID</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="id" id="did" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">品名</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="name" id="dname"  lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">型号</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="size" id="dsize" lay-verify="required" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">库存数量</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="number" id="dnumber" lay-verify="zero" readonly="true" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="*">确认删除</button>
+                    </div>
+                </div>
+            </form>
+        </script>
+        <script type="text/html" id="addgoods">
+            <form class="layui-form" action="/op/add">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                    <legend>添加库存品类</legend>
+                </fieldset>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">品名</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="name"  lay-verify="required" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">型号</label>
+                    <div class="layui-input-inline">
+                      <input type="text" name="size" lay-verify="required" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+                    </div>
+                </div>
+            </form>
+        </script>
+        <script type="text/html" id="tosave">
+            <form class="layui-form" action="/save">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                    <legend>数据备份</legend>
+                </fieldset>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">选择路径</label>
+                    <div class="layui-input-inline">
+                        <input type="file" name="path"  lay-verify="required" class="layui-input" webkitdirectory directory multiple>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="*">确认选择</button>
+                    </div>
+                </div>
+            </form>
+        </script>
+        <script type="text/html" id="toexcel">
+            <form class="layui-form" action="/excel">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                    <legend>xcel导出</legend>
+                </fieldset>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">选择路径</label>
+                    <div class="layui-input-inline">
+                        <input type="file" name="path"  lay-verify="required" class="layui-input" webkitdirectory directory multiple>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="*">确认选择</button>
+                    </div>
+                </div>
+            </form>
+        </script>
+	</div>
+	<script>
+		layui.use(['table','form','layer'], function () {
+			var table = layui.table;
+			var form = layui.form;
+			var layer = layui.layer;
+			table.render({
+				elem: '#good'
+				, url:'/data/goods/'
+				, toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+				, defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+					title: '提示'
+					, layEvent: 'LAYTABLE_TIPS'
+					, icon: 'layui-icon-tips'
+				}]
+				, title: '库存数据表'
+				, cols: [[
+					{ type: 'checkbox', fixed: 'left' }
+					, { field: 'id', title: 'ID', width: 120, fixed: 'left', unresize: true, sort: true }
+					, { field: 'name', title: '品名', width: 250, edit: 'text' , sort: true }
+					, { field: 'size', title: '型号', width: 250, edit: 'text'}
+					, { field: 'number', title: '数量', width: 120 }
+					, { fixed: 'right', title: '操作', toolbar: '#barDemo', width: 200 }
+				]]
+                ,id: 'testReload'
+				, page: true
+                ,limit:50
+                ,skin: 'row'
+                ,even: true
+                ,height: 'full-160'
+			});
+
+			//头工具栏事件
+			table.on('toolbar(good)', function (obj) {
+				var checkStatus = table.checkStatus(obj.config.id);
+				switch (obj.event) {
+					case 'getCheckData':
+						var data = checkStatus.data;
+						layer.alert(JSON.stringify(data));
+						break;
+					case 'getCheckLength':
+						var data = checkStatus.data;
+						layer.msg('选中了：' + data.length + ' 个');
+						break;
+					case 'isAll':
+						layer.msg(checkStatus.isAll ? '全选' : '未全选');
+						break;
+
+					//自定义头工具栏右侧图标 - 提示
+					case 'LAYTABLE_TIPS':
+						layer.alert('这是工具栏右侧自定义的一个图标按钮');
+						break;
+				};
+			});
+
+			//监听行工具事件
+			table.on('tool(good)', function (obj) {
+				var data = obj.data;
+				//console.log(obj)
+				if (obj.event === 'del') {
+					layer.open({
+                        type: 1,
+                        area: ['380px', '340px'],
+                        title:"",
+                        content:$("#delgoods").html(),
+                        success:function () {
+                            $("#did").val(data.id)
+                            $("#dname").val(data.name)
+                            $("#dsize").val(data.size)
+                            $("#dnumber").val(data.number)
+                        }
+                    })
+				} else if (obj.event === 'in') {
+					layer.open({
+                        type: 1,
+                        area: ['380px', '340px'],
+                        title:"",
+                        content:$("#inlog").html(),
+                        success:function () {
+                            $("#iid").val(data.id)
+                            $("#iname").val(data.name)
+                            $("#isize").val(data.size)
+                        }
+                    })
+				}else if (obj.event === 'out') {
+					layer.open({
+                        type: 1,
+                        area: ['380px', '340px'],
+                        title:"",
+                        content:$("#outlog").html(),
+                        success:function () {
+                            $("#oid").val(data.id)
+                            $("#oname").val(data.name)
+                            $("#osize").val(data.size)
+                        }
+                    })
+				}
+			});
+			var $ = layui.$, active = {
+                reload: function(){
+                    var demoReload = $('#demoReload');
+
+                    //执行重载
+                    table.reload('testReload', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        ,where: {
+                            name: demoReload.val()
+                        }
+                  }, 'data');
+                }
+            };
+            $('#searchbt').on('click', function(){
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+            $('#addbt').on('click', function(){
+                layer.open({
+                        type: 1,
+                        area: ['380px', '240px'],
+                        title:"",
+                        content:$("#addgoods").html(),
+                    })
+            });
+            $('#save').on('click', function(){
+                layer.open({
+                        type: 1,
+                        area: ['380px', '240px'],
+                        title:"",
+                        content:$("#tosave").html(),
+                    })
+            });
+            $('#excel').on('click', function(){
+                layer.open({
+                        type: 1,
+                        area: ['380px', '240px'],
+                        title:"",
+                        content:$("#toexcel").html(),
+                    })
+            });
+            form.verify({
+              zero: [
+                /^[0.]+$/
+                ,'当前仍有库存，请出库后删除！'
+              ]
+            });
+		});
+	</script>
+</body>
+</html>
