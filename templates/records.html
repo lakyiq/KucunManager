@@ -14,25 +14,15 @@
 			<!-- 头部区域（可配合layui已有的水平导航） -->
 			<ul class="layui-nav layui-layout-left">
 				<li class="layui-nav-item" ><a href="/index/"><i class="layui-icon layui-icon-table"></i>库存管理</a></li>
-				<li class="layui-nav-item"><a href="/other/"><i class="layui-icon layui-icon-time"></i>出入库记录</a></li>
+				<li class="layui-nav-item"><a href="/count/"><i class="layui-icon layui-icon-rmb"></i>预算统计</a></li>
+                <li class="layui-nav-item"><a href="/other/"><i class="layui-icon layui-icon-time"></i>出入库记录</a></li>
 			</ul>
-			<ul class="layui-nav layui-layout-right">
-				<li class="layui-nav-item"><button type="button" class="layui-btn layui-bg-black" id="save"><i class="layui-icon layui-icon-star"></i>数据备份</button></li>
-			    <li class="layui-nav-item"><button type="button" class="layui-btn layui-bg-black" id="excel"><i class="layui-icon layui-icon-print"></i>导出Excel</button></li>
-            </ul>
 		</div>
 
 		<div style="padding: 2%;">
 			<!-- 内容主体区域 -->
 			<table class="layui-hide" id="record" lay-filter="record"></table>
-
-			<script type="text/html" id="toolbarDemo">
-				<div class="layui-btn-container">
-					<button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
-					<button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
-					<button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
-				</div>
-			</script>
+			<script type="text/html" id="toolbarDemo"></script>
 	</div>
 	<script>
 
@@ -49,14 +39,15 @@
 				}]
 				, title: '记录数据表'
 				, cols: [[
-					{ type: 'checkbox', fixed: 'left' }
-					, { field: 'time', title: '时间', width: 200, fixed: 'left', sort: true ,templet:function (d) {
+					{ field: 'time', title: '时间', width: 160, fixed: 'left', sort: true ,templet:function (d) {
                             return layui.util.toDateString(d.time);
                         }}
-					, { field: 'name', title: '品名', width: 250, edit: 'text' , sort: true }
-					, { field: 'size', title: '型号', width: 250, edit: 'text'}
-					, { field: 'kind', title: '出/入库', width: 120 }
-					, { field: 'change', title: '数量', width: 120 }
+					, { field: 'name', title: '品名', width: 200,  sort: true }
+					, { field: 'size', title: '型号', width: 200,  sort: true }
+					, { field: 'factory', title: '厂家', width: 200,  sort: true }
+					, { field: 'place', title: '前/后道', width: 100,  sort: true }
+					, { field: 'kind', title: '出/入库', width: 100,  sort: true }
+					, { field: 'change', title: '数量', width: 150 }
 				]]
 				, page: true
                 ,limit:50
@@ -69,24 +60,13 @@
 			table.on('toolbar(record)', function (obj) {
 				var checkStatus = table.checkStatus(obj.config.id);
 				switch (obj.event) {
-					case 'getCheckData':
-						var data = checkStatus.data;
-						layer.alert(JSON.stringify(data));
-						break;
-					case 'getCheckLength':
-						var data = checkStatus.data;
-						layer.msg('选中了：' + data.length + ' 个');
-						break;
-					case 'isAll':
-						layer.msg(checkStatus.isAll ? '全选' : '未全选');
-						break;
-
 					//自定义头工具栏右侧图标 - 提示
 					case 'LAYTABLE_TIPS':
 						layer.alert('这是工具栏右侧自定义的一个图标按钮');
 						break;
 				};
 			});
+
 		});
 
 

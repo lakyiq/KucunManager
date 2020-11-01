@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="../static/layui/css/layui.css">
+	<script src="../static/layui/layui.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>库存管理</title>
+</head>
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header">
+			<div class="layui-logo "><i class="layui-icon layui-icon-cart"></i>库存管理系统</div>
+			<!-- 头部区域（可配合layui已有的水平导航） -->
+			<ul class="layui-nav layui-layout-left">
+				<li class="layui-nav-item" ><a href="/index/"><i class="layui-icon layui-icon-table"></i>库存管理</a></li>
+				<li class="layui-nav-item"><a href="/count/"><i class="layui-icon layui-icon-rmb"></i>预算统计</a></li>
+                <li class="layui-nav-item"><a href="/other/"><i class="layui-icon layui-icon-time"></i>出入库记录</a></li>
+			</ul>
+		</div>
+
+		<div style="padding: 2%;">
+			<!-- 内容主体区域 -->
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+              <legend>预算统计</legend>
+            </fieldset>
+            <form class="layui-form" action="/error/" lay-filter="counts" id="counts" style="margin-left: 20%;margin-top: 5%;">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">前/后道</label>
+                        <div class="layui-input-inline">
+                            <select name="place" lay-verify="required">
+                                <option value="">请选择</option>
+                                <option value="前道">前道</option>
+                                <option value="后道">后道</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label"> 出/入库</label>
+                        <div class="layui-input-inline">
+                            <select name="kind" lay-verify="required">
+                                <option value="">请选择</option>
+                                <option value="出库">出库</option>
+                                <option value="入库">入库</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                      <label class="layui-form-label">起始日期</label>
+                      <div class="layui-input-inline">
+                          <input type="text" class="layui-input" name="date1" id="date1" lay-verify="required" placeholder="yyyy-MM-dd HH:mm:ss">
+                      </div>
+                    </div>
+                    <div class="layui-inline">
+                      <label class="layui-form-label">终止日期</label>
+                      <div class="layui-input-inline">
+                          <input type="text" class="layui-input" name="date2" id="date2" lay-verify="required" placeholder="yyyy-MM-dd HH:mm:ss">
+                      </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                      <button class="layui-btn" lay-submit lay-filter="go">立即提交</button>
+                      <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <script type="text/html" id="moneypage">
+            <div>hello</div>
+        </script>
+	</div>
+	<script>
+		layui.use(['laydate','form'], function () {
+			var laydate = layui.laydate;
+			var form = layui.form;
+			laydate.render({
+                elem: '#date1' //指定元素
+                ,trigger: 'click'
+                ,type: 'datetime'
+            });
+			laydate.render({
+                elem: '#date2' //指定元素
+                ,trigger: 'click'
+                ,type: 'datetime'
+            });
+
+			form.on('submit(go)', function(data){
+                layui.use('table', function(){
+                    var table = layui.table;
+                    layer.open({
+                        type : 1,
+                        area : [ "100%", '100%' ],
+                        title : "开支结算",
+                        maxmin : false,
+                        content : '<div><table id="templateTable"></table></div><script type="text/html" id="toolbarDemo"/>',
+                        success : function(index, layero) {
+                              table.render({elem: '#templateTable'
+                               ,url: '/data/counts?place='+data.field.place+'\&kind='+data.field.kind+'\&date1='+data.field.date1+'\&date2='+data.field.date2
+                                , page: true
+                                ,limit:50
+                                ,skin: 'row'
+                                ,even: true
+                                ,height: 'full-60'
+                                  , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+                                , defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                                    title: '提示'
+                                    , layEvent: 'LAYTABLE_TIPS'
+                                    , icon: 'layui-icon-tips'
+                                }]
+                                ,cols: [[ //表头
+                                      {field: 'id', title: '序号', width:80, sort: true}
+                                      , { field: 'name', title: '品名', width: 160 , sort: true }
+                                    , { field: 'size', title: '型号', width: 160 , sort: true}
+                                    , { field: 'factory', title: '厂商', width: 160, sort: true}
+                                    , { field: 'place', title: '前/后道', width: 80}
+                                    , { field: 'number', title: '库存数量', width: 100 }
+                                    , { field: 'kind', title: '进/出库', width: 80}
+                                    , { field: 'sum_change', title: '进/出库数量', width: 130 }
+                                    , { field: 'price', title: '单价', width: 80}
+                                    , { field: 'money', title: '开支金额', width: 100 }
+                                ]]
+                              });
+                        }
+                    });
+                });
+                return false;
+            });
+        });
+	</script>
+</body>
+</html>
